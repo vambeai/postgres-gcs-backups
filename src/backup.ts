@@ -2,7 +2,6 @@ import { Storage, UploadOptions } from "@google-cloud/storage";
 import { exec } from "child_process";
 import { mkdir, stat, unlink } from "fs/promises";
 import path from "path";
-
 import { env } from "./env";
 
 const uploadToGCS = async ({ name, path }: { name: string; path: string }) => {
@@ -33,18 +32,18 @@ const dumpToFile = async (filePath: string) => {
   console.log("Dumping DB to file...");
   await ensureDirectoryExists(filePath);
   return new Promise((resolve, reject) => {
-    const command = `pg_dumpall -h viaduct.proxy.rlwy.net -p 57886 -U postgres | gzip > ${filePath}`;
+    const command = `pg_dump -Fc -h viaduct.proxy.rlwy.net -p 57886 -U postgres -d railway -f ${filePath}`;
     exec(
       command,
       { env: { ...process.env, PGPASSWORD: env.DB_PASSWORD } },
       (error, stdout, stderr) => {
         if (error) {
-          console.error("pg_dumpall error:", stderr);
+          console.error("pg_dump error:", stderr);
           reject({ error: JSON.stringify(error), stderr });
           return;
         }
         if (stderr) {
-          console.warn("pg_dumpall warning:", stderr);
+          console.warn("pg_dump warning:", stderr);
         }
         resolve(stdout);
       }
@@ -52,10 +51,10 @@ const dumpToFile = async (filePath: string) => {
   });
 };
 
-const deleteFile = async (path: string) => {
+const deleteFile = async (filePath: string) => {
   console.log("Deleting file...");
   try {
-    await unlink(path);
+    await unlink(filePath);
     console.log("File deleted successfully");
   } catch (error) {
     console.error("Error deleting file:", error);
@@ -69,7 +68,7 @@ export const backup = async () => {
 
     let date = new Date().toISOString();
     const timestamp = date.replace(/[:.]+/g, "-");
-    const filename = `backup-${timestamp}.sql.gz`;
+    const filename = `backup-${timestamp}.dump`;
     const filepath = `/tmp/bucket-ai/${filename}`;
 
     console.log(`Dumping to file: ${filepath}`);
