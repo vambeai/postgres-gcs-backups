@@ -32,7 +32,7 @@ const dumpToFile = async (filePath: string) => {
   console.log("Dumping DB to file...");
   await ensureDirectoryExists(filePath);
   return new Promise((resolve, reject) => {
-    const command = `pg_dump -Fc -h viaduct.proxy.rlwy.net -p 57886 -U postgres -d railway -f ${filePath}`;
+    const command = `pg_dump -Fc -h postgres.railway.internal -p 5432 -U postgres -d railway -f ${filePath}`;
     exec(
       command,
       { env: { ...process.env, PGPASSWORD: env.DB_PASSWORD } },
