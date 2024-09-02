@@ -1,4 +1,4 @@
-# Postgres S3 backups
+# Postgres S3 backups deploy dump
 
 A simple NodeJS application to backup your PostgreSQL database to GCS via a cron. Duping
 
